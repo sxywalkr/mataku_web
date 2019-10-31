@@ -18,6 +18,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import dateFnsFormat from 'date-fns/format';
@@ -90,24 +91,26 @@ class AllPage extends Component {
 
   componentDidMount() {
     this.setState({ loading: true });
-    this.props.firebase.dbPasiens().on('value', snapshot => {
-      if (snapshot.val()) {
-        const produksObject = snapshot.val();
-        const produksList = Object.keys(produksObject).map(key => ({
-          ...produksObject[key],
-          uid: key,
-        }));
-        this.setState({
-          items: produksList,
-          loading: false,
-        });
-      } else {
-        this.setState({
-          items: null,
-          loading: false,
-        });
-      }
-    })
+    this.props.firebase.dbPasiens()
+      .orderByChild('itemFlag').equalTo('Item di submit')
+      .on('value', snapshot => {
+        if (snapshot.val()) {
+          const produksObject = snapshot.val();
+          const produksList = Object.keys(produksObject).map(key => ({
+            ...produksObject[key],
+            uid: key,
+          }));
+          this.setState({
+            items: produksList,
+            loading: false,
+          });
+        } else {
+          this.setState({
+            items: null,
+            loading: false,
+          });
+        }
+      })
   }
 
   componentWillUnmount() {
@@ -358,65 +361,6 @@ class AllPage extends Component {
                     )}
                   </TableBody>
                 </Table>
-                {/* <Dialog
-                  maxWidth={'sm'}
-                  fullWidth={true}
-                  open={this.state.open}
-                  onClose={this.handleClose}
-                  aria-labelledby="form-dialog-title"
-                >
-                  <DialogTitle id="form-dialog-title">Tambah Data Produk</DialogTitle>
-                  <DialogContent style={{ marginTop: 10, marginBottom: 15 }}>
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                      <DatePicker
-                        margin="normal"
-                        style={{ width: 250, marginBottom: 10 }}
-                        label="Tanggal Transaksi"
-                        value={tanggalTransaksi}
-                        format={'MM/dd/yyyy'}
-                        onChange={this.handleDateChange} />
-                    </MuiPickersUtilsProvider>
-                    <FormControl style={{ marginBottom: 10 }} variant="standard">
-                      <InputLabel htmlFor="selectNamaproduk">Produk</InputLabel>{" "}
-                      <Select
-                        value={selectNamaproduk}
-                        onChange={this.onChange('selectNamaproduk')}
-                        style={{ width: 400 }}
-                        name="selectNamaproduk"
-                      >
-                        {!!produks && produks.map((el1, key) =>
-                          <MenuItem key={key} value={el1.namaproduk}>{el1.namaproduk}</MenuItem>
-                        )}
-                      </Select>
-                    </FormControl>
-                    <TextField
-                      id="noaproduk"
-                      name='noaproduk'
-                      onChange={this.onChange('noaproduk')}
-                      label='NOA (Unit)'
-                      style={{ width: "100%", marginBottom: 10 }}
-                      variant="outlined"
-                      value={noaproduk}
-                    />
-                    <TextField
-                      id="voaproduk"
-                      name='voaproduk'
-                      onChange={this.onChange('voaproduk')}
-                      label='VOA (Rp)'
-                      style={{ width: "100%", marginBottom: 10 }}
-                      variant="outlined"
-                      value={voaproduk}
-                    />
-                  </DialogContent>
-                  <DialogActions>
-                    <Button variant="text" color="secondary" onClick={this.handleClose}>
-                      Cancel
-              </Button>
-                    <Button onClick={this.handleSubmit} variant='contained' color="primary" disabled={isInvalid}>
-                      Submit
-              </Button>
-                  </DialogActions>
-                </Dialog> */}
               </div>
             }
           </div>
@@ -434,12 +378,13 @@ class DetailPage extends PureComponent {
     this.state = {
       loading: false,
       open: false,
-      namaproduk: '',
-      noaproduk: '',
-      voaproduk: '',
+      open2: false,
+      loading2: false,
       item: this.props.location.state.el,
-      itemFoto1 : '',
-      itemFoto2 : '',
+      konfirmKatarak: null,
+      konfirmDeletePic: null,
+      itemFoto1: '',
+      itemFoto2: '',
       ...props.location.state,
     };
   }
@@ -467,13 +412,39 @@ class DetailPage extends PureComponent {
     // var storage = firebase.storage();
     // var pathReference = storage.ref(`${item.tmUid}/${item.itemUid}/1.jpg`);
     // const storage = this.props.firebase.storage()
-    this.props.firebase.storage.ref(`${this.state.item.tmUid}/${this.state.item.itemUid}/1.jpg`).getDownloadURL().then((url) => this.setState({itemFoto1 : url}))
-    this.props.firebase.storage.ref(`${this.state.item.tmUid}/${this.state.item.itemUid}/2.jpg`).getDownloadURL().then((url) => this.setState({itemFoto2 : url}))
+    this.props.firebase.storage.ref(`${this.state.item.tmUid}/${this.state.item.itemUid}/1.jpg`).getDownloadURL().then((url) => this.setState({ itemFoto1: url }))
+    this.props.firebase.storage.ref(`${this.state.item.tmUid}/${this.state.item.itemUid}/2.jpg`).getDownloadURL().then((url) => this.setState({ itemFoto2: url }))
+
+
   }
 
-  componentWillUnmount() {
-    this.props.firebase.hariancs(this.props.match.params.id).off();
-  }
+  // componentDidUpdate() {
+  //   if (this.state.loading2 === true) {
+  //     // console.log('loading2', this.props.location.state.el.itemKonfirmKatarak, this.props.location.state.el)
+  //     // this.props.location.state.el.itemKonfirmKatarak = 'Pasien Katarak'
+  //     this.setState({ konfirmKatarak : 'Pasien Positif Katarak', loading2: false })
+
+  //     // this.props.firebase
+  //     //   .db.ref('dbPasien/' + this.state.item.tmUid)
+  //     //   .once('value', snapshot => {
+  //     //     if (snapshot.val()) {
+  //     //       this.setState({
+  //     //         konfirmKatarak: snapshot.val().itemKonfirmKatarak,
+  //     //         loading2: false,
+  //     //       });
+  //     //     } else {
+  //     //       this.setState({
+  //     //         konfirmKatarak: null,
+  //     //         loading2: false,
+  //     //       })
+  //     //     }
+  //     //   });
+  //   }
+  // }
+
+  // componentWillUnmount() {
+  //   this.props.firebase.hariancs(this.props.match.params.id).off();
+  // }
 
   handleClickOpen = () => {
     this.setState({ open: true });
@@ -483,116 +454,145 @@ class DetailPage extends PureComponent {
     this.setState({ open: false });
   };
 
-  onChange = name => event => {
-    this.setState({
-      [name]: event.target.value,
-    });
+  handleClickOpen2 = () => {
+    this.setState({ open2: true });
   };
 
-  handleSubmit = () => {
-    this.setState({ open: false });
-    this.props.firebase.db.ref('hariancs/' + this.state.hariancs.idproduk).update({
-      // namaproduk: this.state.namaproduk,
-      noaproduk: this.state.noaproduk,
-      voaproduk: this.state.voaproduk,
-    });
-    // this.setState({ loading: true })
-    this.forceUpdate();
+  handleClose2 = () => {
+    this.setState({ open2: false });
+  };
+
+  // onChange = name => event => {
+  //   this.setState({
+  //     [name]: event.target.value,
+  //   });
+  // };
+
+  // handleSubmit = () => {
+  //   this.setState({ open: false });
+  //   this.props.firebase.db.ref('hariancs/' + this.state.hariancs.idproduk).update({
+  //     // namaproduk: this.state.namaproduk,
+  //     noaproduk: this.state.noaproduk,
+  //     voaproduk: this.state.voaproduk,
+  //   });
+  //   // this.setState({ loading: true })
+  //   this.forceUpdate();
+  // }
+
+  handleDeletePic = () => {
+    this.props.firebase.storage.ref(`${this.state.item.tmUid}/${this.state.item.itemUid}/2.jpg`).delete()
+    this.props.firebase.storage.ref(`${this.state.item.tmUid}/${this.state.item.itemUid}/1.jpg`).delete()
+      .then((succ) => {
+        this.props.firebase.db.ref(`dbPasien/${this.state.item.itemUid}`).update({
+          itemRemarkDeletePic: 'Pic Deleted',
+        })
+        .then((succ) => this.setState({ konfirmDeletePic: 'Pic Deleted' }))
+
+      })
+      .catch((e) => console.log(e))
+      .finally(() => {
+        this.setState({ open: false })
+      })
   }
+
+  handlePositifKatarak = () => {
+    try {
+      this.props.firebase.db.ref(`dbPasien/${this.state.item.itemUid}`).update({
+        itemKonfirmKatarak: 'Pasien Positif Katarak',
+      }).then((succ) => this.setState({ konfirmKatarak: 'Pasien Positif Katarak' }))
+    } catch (e) {
+    }
+    finally {
+      this.setState({ open2: false })
+    }
+  }
+
 
 
   render() {
 
-    const { item, loading } = this.state;
+    const { item, loading, konfirmKatarak } = this.state;
     // const isInvalid = noaproduk === '' || voaproduk === ''
     return (
-      <div>
+      <div style={{ width: '100%' }}>
         {loading ? <CircularProgress /> :
-          <div>
-            {/* <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
-              Ubah Data
-            </Button>{' '} */}
-            <Button>
-              <Link
-                to={{
-                  pathname: `${ROUTES.DATABASEUSER}`,
-                }}
-              >
-                BACK
+          <Box display="flex" flexDirection='column'>
+            <Box p={1}>
+              <Button>
+                <Link
+                  to={{
+                    pathname: `${ROUTES.DATABASEUSER}`,
+                  }}
+                >
+                  BACK
               </Link>
-            </Button>
+              </Button>{' '}
+              <Button variant="outlined" color="primary" onClick={() => this.setState({ open2: true })}>
+                Konfirmasi Katarak
+              </Button>{' '}
+              {!item.itemRemarkDeletePic &&
+                <Button variant="outlined" color="primary" onClick={() => this.setState({ open: true })}>
+                  Hapus Gambar
+                </Button>}
+            </Box>
+            <Box p={1} bgcolor="background.paper">
+              <Typography variant="subtitle1" gutterBottom>Nama : {item.itemNama}</Typography>
+              <Typography variant="subtitle1" gutterBottom>itemAlamat : {item.itemitemAlamat}</Typography>
+              <Typography variant="subtitle1" gutterBottom>itemJenisKelamin : {item.itemitemJenisKelamin}</Typography>
+              <Typography variant="subtitle1" gutterBottom>itemUmur : {item.itemitemUmur}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Puskesmas : {item.itemPuskesmas}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Desa/Kelurahan : {item.itemDesaKelurahan}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Kecamatan : {item.itemKecamatan}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Kabupaten : {item.itemKabupaten}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Status Pasien : {konfirmKatarak ? konfirmKatarak : item.itemKonfirmKatarak}</Typography>
+              <Typography variant="subtitle1" gutterBottom>{item.itemRemarkDeletePic ? 'Gambar Sudah Di Hapus Dari FireStorage' : ''}</Typography>
+            </Box>
+            {!item.itemRemarkDeletePic ?
+              <Box display="flex" flexDirection='row' >
+                <Box p={1} display="flex" flexDirection='column' alignItems='center'>
+                  <Typography variant="subtitle1" gutterBottom>Mata Kiri</Typography>
+                  <img style={{ padding: 10 }} src={this.state.itemFoto1} />
+                </Box>
+                <Box p={1} display="flex" flexDirection='column' alignItems='center'>
+                  <Typography variant="subtitle1" gutterBottom>Mata Kanan</Typography>
+                  <img style={{ padding: 10 }} src={this.state.itemFoto2} />
+                </Box>
+              </Box> : ''}
 
-            <Typography variant="h6" gutterBottom>
-              Nama : {item.itemNama}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Puskesmas : {item.itemPuskesmas}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Desa/Kelurahan : {item.itemDesaKelurahan}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Kecamatan : {item.itemKecamatan}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Kabupaten : {item.itemKabupaten}
-            </Typography>
-            <img src={this.state.itemFoto1 } />
-            <img src={this.state.itemFoto2 } />
-            {/* <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Nama Produk</TableCell>
-                  <TableCell>NOA (Unit)</TableCell>
-                  <TableCell>VOA (Rp)</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {!loading && !!hariancs &&
-                  <TableRow>
-                    <TableCell>{hariancs.namaproduk}</TableCell>
-                    <TableCell>{hariancs.noaproduk}</TableCell>
-                    <TableCell>{hariancs.voaproduk}</TableCell>
-                  </TableRow>
-                }
-              </TableBody>
-            </Table> */}
-            {/* <Dialog
-              open={this.state.open}
-              onClose={this.handleClose}
-              aria-labelledby="form-dialog-title"
-            >
-              <DialogTitle id="form-dialog-title">Ubah Data Transaksi</DialogTitle>
-              <DialogContent style={{ marginTop: 10, marginBottom: 15 }}>
-                <TextField
-                  id="noaproduk"
-                  name='noaproduk'
-                  onChange={this.onChange('noaproduk')}
-                  label='NOA (Unit)'
-                  style={{ width: "100%", marginBottom: 10 }}
-                  variant="outlined"
-                  value={noaproduk}
-                />
-                <TextField
-                  id="voaproduk"
-                  name='voaproduk'
-                  onChange={this.onChange('voaproduk')}
-                  label='VOA (Rp)'
-                  style={{ width: "100%", marginBottom: 10 }}
-                  variant="outlined"
-                  value={voaproduk}
-                />
+            <Dialog onClose={this.handleClose} aria-labelledby="simple-dialog-title" open={this.state.open}>
+              <DialogTitle id="simple-dialog-title">Konfirmasi</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  Hapus gambar dari firebase storage?
+                </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button variant="text" color="secondary" onClick={this.handleClose}>
-                  Cancel
-              </Button>
-                <Button onClick={this.handleSubmit} variant='contained' color="primary" disabled={isInvalid}>
-                  Submit
-              </Button>
+                <Button onClick={this.handleClose} color="secondary">
+                  Batal
+                </Button>
+                <Button onClick={this.handleDeletePic} color="primary" variant='contained' autoFocus>
+                  Hapus
+                </Button>
               </DialogActions>
-            </Dialog> */}
-          </div>
+            </Dialog>
+
+            <Dialog onClose={this.handleClose2} aria-labelledby="simple-dialog-title" open={this.state.open2}>
+              <DialogTitle id="simple-dialog-title">Konfirmasi</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  Konfirmasi pasien positif Katarak?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={this.handleClose2} color="secondary">
+                  Batal
+                </Button>
+                <Button onClick={this.handlePositifKatarak} color="primary" variant='contained' autoFocus>
+                  Positif Katarak
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </Box>
         }
       </div>
     );

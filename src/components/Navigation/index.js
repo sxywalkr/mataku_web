@@ -27,7 +27,7 @@ const NavigationAuth = ({authUser}) => (
           Mataku
         </Typography>
         <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.HOME}>Home</Button>
-        <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.ACCOUNT}>Account</Button>
+        {/* <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.ACCOUNT}>Account</Button> */}
         {authUser.userRole.includes(ROLES.CS) && (
           <div>
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.HARIANCS}>Harian CS</Button>
