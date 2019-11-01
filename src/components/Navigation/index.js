@@ -28,23 +28,23 @@ const NavigationAuth = ({authUser}) => (
         </Typography>
         <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.HOME}>Home</Button>
         {/* <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.ACCOUNT}>Account</Button> */}
-        {authUser.userRole.includes(ROLES.CS) && (
+        {!!authUser.userRole && authUser.userRole.includes(ROLES.CS) && (
           <div>
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.HARIANCS}>Harian CS</Button>
           </div>
         )}
-        {authUser.userRole.includes(ROLES.ADMIN) && (
+        {!!authUser.userRole && authUser.userRole.includes(ROLES.ADMIN) && (
           <div>
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.DATABASEUSER}>Database User</Button>
           </div>
         )}
-        {authUser.userRole.includes(ROLES.SYSTEMADMIN) && (
+        {!!authUser.userRole && authUser.userRole.includes(ROLES.SYSTEMADMIN) && (
           <div>
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.PRODUK}>Produks</Button>
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.ADMIN}>Users</Button>
           </div>
         )}
-        {authUser.userRole.includes(ROLES.SUPERADMIN) && (
+        {!!authUser.userRole && authUser.userRole.includes(ROLES.SUPERADMIN) && (
           <div>
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.PRODUK}>Produks</Button>
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.ADMIN}>Users</Button>

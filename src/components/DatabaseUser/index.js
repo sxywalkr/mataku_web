@@ -511,7 +511,7 @@ class DetailPage extends PureComponent {
 
   render() {
 
-    const { item, loading, konfirmKatarak } = this.state;
+    const { item, loading, konfirmKatarak, konfirmDeletePic } = this.state;
     // const isInvalid = noaproduk === '' || voaproduk === ''
     return (
       <div style={{ width: '100%' }}>
@@ -530,7 +530,7 @@ class DetailPage extends PureComponent {
               <Button variant="outlined" color="primary" onClick={() => this.setState({ open2: true })}>
                 Konfirmasi Katarak
               </Button>{' '}
-              {!item.itemRemarkDeletePic &&
+              {!konfirmDeletePic === null || item.itemRemarkDeletePic !== 'Pic Deleted' &&
                 <Button variant="outlined" color="primary" onClick={() => this.setState({ open: true })}>
                   Hapus Gambar
                 </Button>}
@@ -545,9 +545,10 @@ class DetailPage extends PureComponent {
               <Typography variant="subtitle1" gutterBottom>Kecamatan : {item.itemKecamatan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Kabupaten : {item.itemKabupaten}</Typography>
               <Typography variant="subtitle1" gutterBottom>Status Pasien : {konfirmKatarak ? konfirmKatarak : item.itemKonfirmKatarak}</Typography>
-              <Typography variant="subtitle1" gutterBottom>{item.itemRemarkDeletePic ? 'Gambar Sudah Di Hapus Dari FireStorage' : ''}</Typography>
+              <Typography variant="subtitle1" gutterBottom>{item.itemRemarkDeletePic === 'Pic Deleted' ? 'Gambar sudah dihapus dari firebase storage' : '' }</Typography>
             </Box>
-            {!item.itemRemarkDeletePic ?
+            {/* {console.log(konfirmDeletePic)} */}
+            {!konfirmDeletePic === null || item.itemRemarkDeletePic !== 'Pic Deleted'?
               <Box display="flex" flexDirection='row' >
                 <Box p={1} display="flex" flexDirection='column' alignItems='center'>
                   <Typography variant="subtitle1" gutterBottom>Mata Kiri</Typography>
