@@ -1,5 +1,5 @@
 {
-  "name": "appkinerja2019",
+  "name": "mataku",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -10,6 +10,7 @@
     "date-fns": "^2.0.1",
     "file-saver": "^2.0.2",
     "firebase": "^6.5.0",
+    "mui-datatables": "^2.12.4",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-native-fs": "^2.14.1",

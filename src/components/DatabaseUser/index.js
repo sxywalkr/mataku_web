@@ -9,12 +9,12 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
+// import TextField from '@material-ui/core/TextField';
+// import Table from '@material-ui/core/Table';
+// import TableBody from '@material-ui/core/TableBody';
+// import TableCell from '@material-ui/core/TableCell';
+// import TableHead from '@material-ui/core/TableHead';
+// import TableRow from '@material-ui/core/TableRow';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -23,21 +23,22 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import dateFnsFormat from 'date-fns/format';
 
-import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
+// import Card from '@material-ui/core/Card';
+// import CardActionArea from '@material-ui/core/CardActionArea';
+// import CardActions from '@material-ui/core/CardActions';
+// import CardContent from '@material-ui/core/CardContent';
+// import CardMedia from '@material-ui/core/CardMedia';
 // import getMonth from 'date-fns/getMonth'
 // import { format, compareAsc } from 'date-fns';
-import DateFnsUtils from '@date-io/date-fns';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+// import DateFnsUtils from '@date-io/date-fns';
+// import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+// import InputLabel from '@material-ui/core/InputLabel';
+// import MenuItem from '@material-ui/core/MenuItem';
+// import FormControl from '@material-ui/core/FormControl';
+// import Select from '@material-ui/core/Select';
 import Box from '@material-ui/core/Box';
 import XLSX from 'xlsx';
+import MUIDataTable from "mui-datatables";
 // import { writeFile, DocumentDirectoryPath } from 'react-native-fs';
 // import { saveAs } from 'file-saver';
 
@@ -100,8 +101,25 @@ class AllPage extends Component {
             ...produksObject[key],
             uid: key,
           }));
+          const a = []
+          snapshot.forEach(el => {
+            a.push({
+              Nama: el.val().itemNama,
+              Alamat: el.val().itemAlamat,
+              Pekerjaan: el.val().itemPekerjaan,
+              Umur: el.val().itemUmur,
+              Kabupaten: el.val().itemKabupaten,
+              Kecamatan: el.val().itemKecamatan,
+              DesaKelurahan: el.val().itemDesaKelurahan,
+              Puskesmas: el.val().itemPuskesmas,
+              KonfirmKatarak: el.val().itemKonfirmKatarak,
+              Detail: [el.val().itemUid, el.val()],
+              itemRemarkDeletePic: el.val().itemRemarkDeletePic ? el.val().itemRemarkDeletePic : undefined,
+            })
+          })
           this.setState({
             items: produksList,
+            itemsA: a,
             loading: false,
           });
         } else {
@@ -207,127 +225,113 @@ class AllPage extends Component {
   }
 
   exportFile = () => {
-    const ws = XLSX.utils.json_to_sheet(this.state.hariancss);
+    const ws = XLSX.utils.json_to_sheet(this.state.itemsA);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "db");
-    XLSX.writeFile(wb, "dbKinerja.xlsx")
+    XLSX.utils.book_append_sheet(wb, ws, "master database");
+    XLSX.writeFile(wb, "master data pasien.xlsx")
+  };
+
+  columns = [{
+    name: "Nama",
+    label: "Nama",
+    options: {
+      filter: false,
+      sort: true,
+    }
+  },
+  {
+    name: "Kabupaten",
+    label: "Kabupaten",
+    options: {
+      filter: true,
+      sort: true,
+    }
+  },
+  {
+    name: "Kecamatan",
+    label: "Kecamatan",
+    options: {
+      filter: true,
+      sort: true,
+    }
+  },
+  {
+    name: "DesaKelurahan",
+    label: "Desa Kelurahan",
+    options: {
+      filter: true,
+      sort: true,
+    }
+  },
+  {
+    name: "Puskesmas",
+    label: "Puskesmas",
+    options: {
+      filter: true,
+      sort: true,
+    }
+  },
+  {
+    name: "Detail",
+    label: "Action",
+    options: {
+      filter: false,
+      sort: false,
+      customBodyRender: (value, tableMeta, updateValue) => {
+        return (
+          // console.log({value})
+          <Button component={Link}
+            to={{
+              pathname: `${ROUTES.DATABASEUSER}/${value[0]}`,
+              state: value[1],
+            }}
+          >
+            Detail
+          </Button>
+          // <Button variant="outlined" color="primary" onClick={() => this.handleSubmitKeAnalysis(value[0])}
+          //   disabled={value[1] === "Update detail by admin lab done" ? false : true}
+          // >
+          //   Submit ke Analis
+          // </Button>
+        );
+      }
+    }
+  },
+  ];
+
+  options = {
+    filterType: 'dropdown',
+    rowsPerPage: 20,
+    selectableRows: 'none',
+    download: false,
+    print: false,
   };
 
   render() {
-    // console.log(this.state.hariancss)
-    const { loading, items } = this.state;
-    // const isInvalid = tanggalTransaksi === '' || selectNamaproduk === '' || noaproduk === '' || voaproduk === ''
+    const { loading, items, itemsA } = this.state;
     return (
       <AuthUserContext.Consumer>
         {authUser => (
           <div>
             {loading ? <CircularProgress /> :
               <div>
-                {/* <Box
-                  display="flex"
-                  alignItems="flex-end"
-                  p={1}
-                  m={1}
-                  css={{ height: 50 }}
-                >
-                  <Box p={1} >
-                    <FormControl variant="standard">
-                      <InputLabel htmlFor="selectBulan">Bulan</InputLabel>{" "}
-                      <Select
-                        value={selectBulan}
-                        onChange={this.onChange('selectBulan')}
-                        style={{ width: 200 }}
-                        name="selectBulan"
-                      >
-                        <MenuItem key={1} value={0}>Januari</MenuItem>
-                        <MenuItem key={2} value={1}>Februari</MenuItem>
-                        <MenuItem key={3} value={2}>Maret</MenuItem>
-                        <MenuItem key={4} value={3}>April</MenuItem>
-                        <MenuItem key={5} value={4}>Mei</MenuItem>
-                        <MenuItem key={6} value={5}>Juni</MenuItem>
-                        <MenuItem key={7} value={6}>Juli</MenuItem>
-                        <MenuItem key={8} value={7}>Agustus</MenuItem>
-                        <MenuItem key={9} value={8}>September</MenuItem>
-                        <MenuItem key={10} value={9}>Oktober</MenuItem>
-                        <MenuItem key={11} value={10}>November</MenuItem>
-                        <MenuItem key={12} value={11}>Desember</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </Box> */}
                 <div style={{ width: '100%' }}>
-                  {/* <Box
-                    display="flex"
-                    alignItems="flex-end"
-                    p={1}
-                    m={1}
-                    css={{ height: 30 }}
-                  >
-                    <Box p={1} >
-                      <FormControl variant="standard">
-                        <InputLabel htmlFor="selectKacab">Kantor Cabang</InputLabel>{" "}
-                        <Select
-                          value={selectKacab}
-                          onChange={this.onChange('selectKacab')}
-                          style={{ width: 200 }}
-                          name="selectKacab"
-                        // disabled={ this.state.hariancss === [] || this.state.hariancss === null ? true : false }
-                        >
-                          <MenuItem value="---">---</MenuItem>
-                          <MenuItem value="KC KENDARI">KC KENDARI</MenuItem>
-                          <MenuItem value="KCP KOLAKA">KCP KOLAKA</MenuItem>
-                          <MenuItem value="KCP BAUBAU">KCP BAUBAU</MenuItem>
-                          <MenuItem value="KK ANDUONOHU">KK ANDUONOHU</MenuItem>
-                          <MenuItem value="KK UNHALU">KK UNHALU</MenuItem>
-                          <MenuItem value="KLKK KONAWE">KLKK KONAWE</MenuItem>
-                          <MenuItem value="KLKK KENDARI">KLKK KENDARI</MenuItem>
-                          <MenuItem value="KLKK BAUBAU">KLKK BAUBAU</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Box>
-                    <Box p={1} >
-                      <FormControl variant="standard">
-                        <InputLabel htmlFor="selectOperator">Operator</InputLabel>{" "}
-                        <Select
-                          value={selectOperator}
-                          onChange={this.onChange('selectOperator')}
-                          // style={{ width: 200 }}
-                          name="selectOperator"
-                        >
-                          <MenuItem value="Dan">Dan</MenuItem>
-                          <MenuItem value="Atau">Atau</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Box>
-                    <Box p={1} >
-                      <FormControl variant="standard">
-                        <InputLabel htmlFor="selectUserCs">CS</InputLabel>{" "}
-                        <Select
-                          value={selectUserCs}
-                          onChange={this.onChange('selectUserCs')}
-                          style={{ width: 200 }}
-                          name="selectUserCs"
-                        >
-                            <MenuItem key={999} value="---">---</MenuItem>
-                          {!!userCs && userCs.map((el, key) =>
-                            <MenuItem key={key} value={el.username}>{el.username}</MenuItem>
-                          )}
-                        </Select>
-                      </FormControl>
-                    </Box>
-                    <Box p={1} >
-                      <Button variant="outlined" color="primary" onClick={() => this.prosesFilter(this.state.selectKacab, this.state.selectUserCs)}>
-                        Proses
+                  <Box p={1} >
+                    <Button variant="outlined" color="primary" onClick={this.exportFile}>
+                      Export All Master Database to Excel
                     </Button>
-                    </Box>
-                    <Box p={1} >
-                      <Button variant="outlined" color="primary" onClick={this.exportFile}>
-                        Export Excel
-                    </Button>
-                    </Box>
-                  </Box> */}
+                  </Box>
                 </div>
-                <Table>
+                {/* {console.log('a', items)} */}
+                {/* {console.log('b', itemsA)} */}
+                <MUIDataTable
+                  // title={"Tabel Master Data"}
+                  data={this.state.itemsA}
+                  columns={this.columns}
+                  options={this.options}
+                />
+
+                {/* <Table>
                   <TableHead>
                     <TableRow>
                       <TableCell>Nama</TableCell>
@@ -341,7 +345,6 @@ class AllPage extends Component {
                   <TableBody>
                     {!loading && !!items && items.map((el, key) =>
                       <TableRow key={key}>
-                        {/* <TableCell>{dateFnsFormat(new Date(el.tanggalTransaksi), 'MM/dd/yyyy')}</TableCell> */}
                         <TableCell>{el.itemNama}</TableCell>
                         <TableCell>{el.itemKabupaten}</TableCell>
                         <TableCell>{el.itemKecamatan}</TableCell>
@@ -360,7 +363,7 @@ class AllPage extends Component {
                       </TableRow>
                     )}
                   </TableBody>
-                </Table>
+                </Table> */}
               </div>
             }
           </div>
@@ -375,14 +378,15 @@ class AllPage extends Component {
 class DetailPage extends PureComponent {
   constructor(props) {
     super(props);
+    console.log(this.props.location.state)
     this.state = {
       loading: false,
       open: false,
       open2: false,
       loading2: false,
-      item: this.props.location.state.el,
+      item: this.props.location.state,
       konfirmKatarak: null,
-      konfirmDeletePic: null,
+      konfirmDeletePic: this.props.location.state.itemRemarkDeletePic === undefined ? 'Gambar belum di pindah ke lokal disk atau cloud storage' : this.props.location.state.itemRemarkDeletePic,
       itemFoto1: '',
       itemFoto2: '',
       ...props.location.state,
@@ -390,6 +394,8 @@ class DetailPage extends PureComponent {
   }
 
   componentDidMount() {
+    // console.log(this.props.location.state.el.itemRemarkDeletePic)
+    // console.log(this.props.location.state.el)
     // this.setState({ loading: true });
     // this.props.firebase
     //   .db.ref('hariancs/' + this.props.match.params.id)
@@ -486,7 +492,7 @@ class DetailPage extends PureComponent {
         this.props.firebase.db.ref(`dbPasien/${this.state.item.itemUid}`).update({
           itemRemarkDeletePic: 'Pic Deleted',
         })
-        .then((succ) => this.setState({ konfirmDeletePic: 'Pic Deleted' }))
+          .then((succ) => this.setState({ konfirmDeletePic: 'Pic Deleted' }))
 
       })
       .catch((e) => console.log(e))
@@ -530,25 +536,24 @@ class DetailPage extends PureComponent {
               <Button variant="outlined" color="primary" onClick={() => this.setState({ open2: true })}>
                 Konfirmasi Katarak
               </Button>{' '}
-              {!konfirmDeletePic === null || item.itemRemarkDeletePic !== 'Pic Deleted' &&
+              {konfirmDeletePic !== 'Pic Deleted' &&
                 <Button variant="outlined" color="primary" onClick={() => this.setState({ open: true })}>
                   Hapus Gambar
                 </Button>}
             </Box>
             <Box p={1} bgcolor="background.paper">
               <Typography variant="subtitle1" gutterBottom>Nama : {item.itemNama}</Typography>
-              <Typography variant="subtitle1" gutterBottom>itemAlamat : {item.itemitemAlamat}</Typography>
-              <Typography variant="subtitle1" gutterBottom>itemJenisKelamin : {item.itemitemJenisKelamin}</Typography>
-              <Typography variant="subtitle1" gutterBottom>itemUmur : {item.itemitemUmur}</Typography>
+              <Typography variant="subtitle1" gutterBottom>itemAlamat : {item.itemAlamat}</Typography>
+              <Typography variant="subtitle1" gutterBottom>itemJenisKelamin : {item.itemJenisKelamin}</Typography>
+              <Typography variant="subtitle1" gutterBottom>itemUmur : {item.itemUmur}</Typography>
               <Typography variant="subtitle1" gutterBottom>Puskesmas : {item.itemPuskesmas}</Typography>
               <Typography variant="subtitle1" gutterBottom>Desa/Kelurahan : {item.itemDesaKelurahan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Kecamatan : {item.itemKecamatan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Kabupaten : {item.itemKabupaten}</Typography>
               <Typography variant="subtitle1" gutterBottom>Status Pasien : {konfirmKatarak ? konfirmKatarak : item.itemKonfirmKatarak}</Typography>
-              <Typography variant="subtitle1" gutterBottom>{item.itemRemarkDeletePic === 'Pic Deleted' ? 'Gambar sudah dihapus dari firebase storage' : '' }</Typography>
+              <Typography variant="subtitle1" gutterBottom>{konfirmDeletePic === 'Pic Deleted' ? 'Gambar sudah dihapus dari firebase storage' : konfirmDeletePic}</Typography>
             </Box>
-            {/* {console.log(konfirmDeletePic)} */}
-            {!konfirmDeletePic === null || item.itemRemarkDeletePic !== 'Pic Deleted'?
+            {konfirmDeletePic !== 'Pic Deleted' ?
               <Box display="flex" flexDirection='row' >
                 <Box p={1} display="flex" flexDirection='column' alignItems='center'>
                   <Typography variant="subtitle1" gutterBottom>Mata Kiri</Typography>
@@ -565,6 +570,7 @@ class DetailPage extends PureComponent {
               <DialogContent>
                 <DialogContentText id="alert-dialog-description">
                   Hapus gambar dari firebase storage?
+                  Pastikan gambar sudah di save ke local disk atau cloud storage
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
