@@ -513,6 +513,18 @@ class DetailPage extends PureComponent {
     }
   }
 
+  handleNegatifKatarak = () => {
+    try {
+      this.props.firebase.db.ref(`dbPasien/${this.state.item.itemUid}`).update({
+        itemKonfirmKatarak: 'Pasien Negatif Katarak',
+      }).then((succ) => this.setState({ konfirmKatarak: 'Pasien Negatif Katarak' }))
+    } catch (e) {
+    }
+    finally {
+      this.setState({ open2: false })
+    }
+  }
+
 
 
   render() {
@@ -550,8 +562,10 @@ class DetailPage extends PureComponent {
               <Typography variant="subtitle1" gutterBottom>Desa/Kelurahan : {item.itemDesaKelurahan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Kecamatan : {item.itemKecamatan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Kabupaten : {item.itemKabupaten}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Visus Mata Kiri : {item.itemVisusMataKiri}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Visus Mata Kanan : {item.itemVisusMataKanan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Status Pasien : {konfirmKatarak ? konfirmKatarak : item.itemKonfirmKatarak}</Typography>
-              <Typography variant="subtitle1" gutterBottom>{konfirmDeletePic === 'Pic Deleted' ? 'Gambar sudah dihapus dari firebase storage' : konfirmDeletePic}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Status Gambar : {konfirmDeletePic === 'Pic Deleted' ? 'Gambar sudah dihapus dari firebase storage' : konfirmDeletePic}</Typography>
             </Box>
             {konfirmDeletePic !== 'Pic Deleted' ?
               <Box display="flex" flexDirection='row' >
@@ -593,6 +607,9 @@ class DetailPage extends PureComponent {
               <DialogActions>
                 <Button onClick={this.handleClose2} color="secondary">
                   Batal
+                </Button>
+                <Button onClick={this.handleNegatifKatarak} color="secondary" variant='contained' autoFocus>
+                  Negatif Katarak
                 </Button>
                 <Button onClick={this.handlePositifKatarak} color="primary" variant='contained' autoFocus>
                   Positif Katarak
