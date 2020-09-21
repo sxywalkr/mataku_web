@@ -40,7 +40,7 @@ const NavigationAuth = ({authUser}) => (
         )}
         {!!authUser.userRole && authUser.userRole.includes(ROLES.SYSTEMADMIN) && (
           <div>
-            <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.PRODUK}>Produks</Button>
+            {/* <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.PRODUK}>Produks</Button> */}
             <Button color="inherit" style={{marginRight: 5}} component={Link} to={ROUTES.ADMIN}>Users</Button>
           </div>
         )}

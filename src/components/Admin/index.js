@@ -118,11 +118,11 @@ class UserListBase extends Component {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Email</TableCell>
-              <TableCell>Username</TableCell>
-              <TableCell>NIP</TableCell>
-              {/* <TableCell>Area</TableCell> */}
-              <TableCell>Kantor Cabang</TableCell>
+              <TableCell>Nama</TableCell>
+              <TableCell>Kabupaten</TableCell>
+              <TableCell>Kecamatan</TableCell>
+              <TableCell>Desa Kelurahan</TableCell>
+              <TableCell>Puskesmas</TableCell>
               <TableCell>Role</TableCell>
               <TableCell colSpan={2}>Action</TableCell>
             </TableRow>
@@ -130,30 +130,27 @@ class UserListBase extends Component {
           <TableBody>
             {!loading && !!users && users.map((el, key) =>
               <TableRow key={key}>
-                <TableCell>{el.email}</TableCell>
-                <TableCell>{el.username}</TableCell>
-                <TableCell>{el.nipUser}</TableCell>
-                {/* <TableCell>{el.area}</TableCell> */}
-                <TableCell>{el.kacab}</TableCell>
-                <TableCell>{el.roles}</TableCell>
-                <TableCell>
-                  {el.roles[0] === 'ADMIN'  || el.roles[0] === 'SUPERADMIN' ? '' :
-                    <Button component={Link}
-                      to={{
-                        pathname: `${ROUTES.ADMIN}/${el.uid}`,
-                        state: { el },
-                      }}
-                    >
-                      Detail
-                          </Button>
-                  }
+                <TableCell>{el.userName}</TableCell>
+                <TableCell>{el.userKabupaten}</TableCell>
+                <TableCell>{el.userKecamatan}</TableCell>
+                <TableCell>{el.userDesaKelurahan}</TableCell>
+                <TableCell>{el.userPuskesmas}</TableCell>
+                <TableCell>{el.userRole}</TableCell>
+                <TableCell>0
+                  <Button component={Link}
+                    to={{
+                      pathname: `${ROUTES.ADMIN}/${el.uid}`,
+                      state: { el },
+                    }}
+                  >
+                    Detail
+                  </Button>
+
                 </TableCell>
                 <TableCell>
-                  {el.roles[0] === 'ADMIN' || el.roles[0] === 'SUPERADMIN' ? '' :
-                    <Button variant="text" color="secondary" onClick={() => this.handleDelete(el.uid)}>
-                      Hapus
-                        </Button>
-                  }
+                  <Button variant="text" color="secondary" onClick={() => this.handleDelete(el.uid)}>
+                    Hapus
+                  </Button>
                 </TableCell>
               </TableRow>
             )}
@@ -172,6 +169,9 @@ class UserItemBase extends Component {
     this.state = {
       loading: false,
       user: null,
+      userName: '',
+      userRole: '',
+
       nipUser: '0000',
       open: false,
       kacab: '',
@@ -191,10 +191,8 @@ class UserItemBase extends Component {
       .on('value', snapshot => {
         this.setState({
           user: snapshot.val(),
-          nipUser: snapshot.val().nipUser,
-          area: snapshot.val().area,
-          kacab: snapshot.val().kacab,
-          roles: snapshot.val().roles,
+          namaUser: snapshot.val().namaUser,
+          userRole: snapshot.val().userRole,
           loading: false,
         });
         // console.log(snapshot.val());
@@ -228,15 +226,8 @@ class UserItemBase extends Component {
   handleSubmit = () => {
     // console.log(this.state);
     this.setState({ open: false });
-    const roles = [];
-    roles.push(this.state.roles);
-    // console.log(roles[0]);
     this.props.firebase.db.ref('users/' + this.props.match.params.id).update({
-      nipUser: this.state.nipUser,
-      area: this.state.area,
-      kacab: this.state.selectKacab,
-      roles: [roles[0]],
-      role: this.state.roles,
+      userRole: this.state.userRole,
     })
   }
 
@@ -245,12 +236,12 @@ class UserItemBase extends Component {
     // console.log(this.state);
     // console.log(this.props.match.params.id)
 
-    const { user, loading, roles, selectKacab, nipUser } = this.state;
-    const isInvalid = nipUser === '' || selectKacab === '' || roles === ''
+    const { user, loading, userName, userRole } = this.state;
+    const isInvalid = userRole === ''
     return (
       <div>
         <Button variant="outlined" color="primary" onClick={this.handleClickOpen}>
-          Ubah Data
+          Ubah Role
         </Button>{' '}
         <Button>
           <Link
@@ -265,27 +256,21 @@ class UserItemBase extends Component {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Email</TableCell>
-              <TableCell>Username</TableCell>
-              <TableCell>NIP</TableCell>
-              <TableCell>Kantor Cabang</TableCell>
+              <TableCell>Name</TableCell>
               <TableCell>Role</TableCell>
-              <TableCell>Reset Password</TableCell>
+              {/* <TableCell>Action</TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
             {!loading && !!user &&
               <TableRow>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.username}</TableCell>
-                <TableCell>{user.nipUser}</TableCell>
-                <TableCell>{user.kacab}</TableCell>
-                <TableCell>{user.roles}</TableCell>
-                <TableCell>
-                  <Button variant="text" color="primary" onClick={() => this.onSendPasswordResetEmail()}>
-                    Kirim Password Reset
-                    </Button>
-                </TableCell>
+                <TableCell>{user.userName}</TableCell>
+                <TableCell>{user.userRole}</TableCell>
+                {/* <TableCell>
+                  <Button variant="text" color="secondary" onClick={() => this.setState({ open: true })}>
+                    Ubah Role
+                  </Button>
+                </TableCell> */}
               </TableRow>
             }
           </TableBody>
@@ -297,47 +282,16 @@ class UserItemBase extends Component {
         >
           <DialogTitle id="form-dialog-title">Ubah Data User</DialogTitle>
           <DialogContent>
-            {/* <DialogContentText>
-              Ubah Data area dan user role
-              </DialogContentText> */}
-            <TextField
-              id="nipUser"
-              name='nipUser'
-              // value={username}
-              onChange={this.onChange('nipUser')}
-              // type="text"
-              label="NIP"
-              style={{ width: "100%", marginTop: 15 }}
-              variant="outlined"
-            />
             <FormControl style={{ marginTop: 15 }} variant="standard">
               <InputLabel htmlFor="roles">Role</InputLabel>{" "}
               <Select
-                value={roles}
-                onChange={this.onChange('roles')}
+                value={userRole}
+                onChange={this.onChange('userRole')}
                 style={{ width: 400 }}
-                name="roles"
+                name="userRole"
               >
-                <MenuItem value="CS">CS</MenuItem>
                 <MenuItem value="ROLELESS">ROLELESS</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl style={{ marginTop: 15 }} variant="standard">
-              <InputLabel htmlFor="selectKacab">Kantor Cabang</InputLabel>{" "}
-              <Select
-                value={selectKacab}
-                onChange={this.onChange('selectKacab')}
-                style={{ width: 400 }}
-                name="selectKacab"
-              >
-                <MenuItem value="KC KENDARI">KC KENDARI</MenuItem>
-                <MenuItem value="KCP KOLAKA">KCP KOLAKA</MenuItem>
-                <MenuItem value="KCP BAUBAU">KCP BAUBAU</MenuItem>
-                <MenuItem value="KK ANDUONOHU">KK ANDUONOHU</MenuItem>
-                <MenuItem value="KK UNHALU">KK UNHALU</MenuItem>
-                <MenuItem value="KLKK KONAWE">KLKK KONAWE</MenuItem>
-                <MenuItem value="KLKK KENDARI">KLKK KENDARI</MenuItem>
-                <MenuItem value="KLKK BAUBAU">KLKK BAUBAU</MenuItem>
+                <MenuItem value="Surveyor">Surveyor</MenuItem>
               </Select>
             </FormControl>
           </DialogContent>
@@ -345,7 +299,7 @@ class UserItemBase extends Component {
             <Button variant="text" color="secondary" onClick={this.handleClose}>
               Cancel
               </Button>
-            <Button onClick={this.handleSubmit} variant='contained' color="primary" disabled = {isInvalid}>
+            <Button onClick={this.handleSubmit} variant='contained' color="primary" disabled={isInvalid}>
               Submit
               </Button>
           </DialogActions>
@@ -356,7 +310,7 @@ class UserItemBase extends Component {
 
 }
 
-const condition = authUser => authUser && authUser.roles.includes(ROLES.SUPERADMIN);
+const condition = authUser => authUser && authUser.userRole.includes(ROLES.SYSTEMADMIN);
 
 const UserList = withFirebase(UserListBase);
 const UserItem = withFirebase(UserItemBase);

@@ -79,10 +79,13 @@ class AllPage extends Component {
       itemKabupaten: '',
       itemKecamatan: '',
       itemNama: '',
+      itemTelepon1: '',
+      itemTelepon2: '',
       itemPekerjaan: '',
       itemPuskesmas: '',
       itemUid: '',
       itemUmur: '',
+      itemJaminanKesehatan: '',
       tmName: '',
       tmUid: '',
     };
@@ -105,9 +108,12 @@ class AllPage extends Component {
           snapshot.forEach(el => {
             a.push({
               Nama: el.val().itemNama,
+              Telepon1: el.val().itemTelepon1,
+              Telepon2: el.val().itemTelepon2,
               Alamat: el.val().itemAlamat,
               Pekerjaan: el.val().itemPekerjaan,
               Umur: el.val().itemUmur,
+              JaminanKesehatan: el.val().itemJaminanKesehatan,
               Kabupaten: el.val().itemKabupaten,
               Kecamatan: el.val().itemKecamatan,
               DesaKelurahan: el.val().itemDesaKelurahan,
@@ -555,9 +561,12 @@ class DetailPage extends PureComponent {
             </Box>
             <Box p={1} bgcolor="background.paper">
               <Typography variant="subtitle1" gutterBottom>Nama : {item.itemNama}</Typography>
-              <Typography variant="subtitle1" gutterBottom>itemAlamat : {item.itemAlamat}</Typography>
-              <Typography variant="subtitle1" gutterBottom>itemJenisKelamin : {item.itemJenisKelamin}</Typography>
-              <Typography variant="subtitle1" gutterBottom>itemUmur : {item.itemUmur}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Alamat : {item.itemAlamat}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Telepon1 : {item.itemTelepon1}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Telepon2 : {item.itemTelepon2}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Jenis Kelamin : {item.itemJenisKelamin}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Umur : {item.itemUmur}</Typography>
+              <Typography variant="subtitle1" gutterBottom>Jaminan Kesehatan : {item.itemJaminanKesehatan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Puskesmas : {item.itemPuskesmas}</Typography>
               <Typography variant="subtitle1" gutterBottom>Desa/Kelurahan : {item.itemDesaKelurahan}</Typography>
               <Typography variant="subtitle1" gutterBottom>Kecamatan : {item.itemKecamatan}</Typography>
